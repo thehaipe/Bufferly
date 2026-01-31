@@ -22,7 +22,6 @@
 
 ### 🎡 The Spin Dial
 Forget long, boring lists. Use your mouse wheel to cycle through copied items. The circular motion keeps your focus centered and your navigation fast.
-<div><img src="assets/demo_dial.gif" alt="Spin Dial Demo" width="600"></div>
 
 ### ⌨️ Custom Global Hotkeys
 Record your own shortcuts to summon Bufferfly instantly. Whether it's the classic `Cmd+Shift+V` or something unique, it's all in your control.
