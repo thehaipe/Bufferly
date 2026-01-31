@@ -24,11 +24,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupHotkeys() {
-        // Register HotKey: Control + Shift + V (Code 9)
-        let vKeyCode: UInt32 = 9
-        let modifiers = UInt32(controlKey | shiftKey)
-        
-        HotKeyService.shared.register(keyCode: vKeyCode, modifiers: modifiers)
+        // Init service and register saved/default hotkey
+        HotKeyService.shared.register()
         
         HotKeyService.shared.onHotKeyTriggered = {
             Task { @MainActor in
