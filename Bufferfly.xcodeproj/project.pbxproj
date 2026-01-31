@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		A35AB6472F2D370F006A3BEE /* Bufferly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bufferly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A35AB6472F2D370F006A3BEE /* Bufferfly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bufferfly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		A35AB6482F2D370F006A3BEE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A35AB6472F2D370F006A3BEE /* Bufferly.app */,
+				A35AB6472F2D370F006A3BEE /* Bufferfly.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A35AB6462F2D370F006A3BEE /* Bufferly */ = {
+		A35AB6462F2D370F006A3BEE /* Bufferfly */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A35AB6522F2D370F006A3BEE /* Build configuration list for PBXNativeTarget "Bufferly" */;
+			buildConfigurationList = A35AB6522F2D370F006A3BEE /* Build configuration list for PBXNativeTarget "Bufferfly" */;
 			buildPhases = (
 				A35AB6432F2D370F006A3BEE /* Sources */,
 				A35AB6442F2D370F006A3BEE /* Frameworks */,
@@ -63,11 +63,11 @@
 			fileSystemSynchronizedGroups = (
 				A35AB6492F2D370F006A3BEE /* Bufferly */,
 			);
-			name = Bufferly;
+			name = Bufferfly;
 			packageProductDependencies = (
 			);
 			productName = Bufferly;
-			productReference = A35AB6472F2D370F006A3BEE /* Bufferly.app */;
+			productReference = A35AB6472F2D370F006A3BEE /* Bufferfly.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A35AB6422F2D370F006A3BEE /* Build configuration list for PBXProject "Bufferly" */;
+			buildConfigurationList = A35AB6422F2D370F006A3BEE /* Build configuration list for PBXProject "Bufferfly" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -99,7 +99,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A35AB6462F2D370F006A3BEE /* Bufferly */,
+				A35AB6462F2D370F006A3BEE /* Bufferfly */,
 			);
 		};
 /* End PBXProject section */
@@ -250,6 +250,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -259,7 +260,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Bufferly;
+				INFOPLIST_KEY_CFBundleDisplayName = Bufferfly;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -268,7 +269,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.luganskyy.Bufferly;
+				PRODUCT_BUNDLE_IDENTIFIER = com.luganskyy.Bufferfly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -285,6 +286,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -294,7 +296,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Bufferly;
+				INFOPLIST_KEY_CFBundleDisplayName = Bufferfly;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -303,7 +305,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.luganskyy.Bufferly;
+				PRODUCT_BUNDLE_IDENTIFIER = com.luganskyy.Bufferfly;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -318,7 +320,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A35AB6422F2D370F006A3BEE /* Build configuration list for PBXProject "Bufferly" */ = {
+		A35AB6422F2D370F006A3BEE /* Build configuration list for PBXProject "Bufferfly" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A35AB6502F2D370F006A3BEE /* Debug */,
@@ -327,7 +329,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A35AB6522F2D370F006A3BEE /* Build configuration list for PBXNativeTarget "Bufferly" */ = {
+		A35AB6522F2D370F006A3BEE /* Build configuration list for PBXNativeTarget "Bufferfly" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A35AB6532F2D370F006A3BEE /* Debug */,

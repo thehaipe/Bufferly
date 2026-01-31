@@ -23,7 +23,7 @@ struct AboutSettingsView: View {
                         }
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Bufferly").font(.headline)
+                        Text("Bufferfly").font(.headline)
                         Text("Version \(appVersion)")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -33,11 +33,11 @@ struct AboutSettingsView: View {
             }
             
             Section("Links") {
-                AboutLink(title: "GitHub Repository", iconName: "chevron.left.forwardslash.chevron.right", url: "https://github.com/thehaipe/Bufferly")
+                AboutLink(title: "GitHub Repository", iconName: "chevron.left.forwardslash.chevron.right", url: "https://github.com/thehaipe/Bufferfly")
                 
                 AboutLink(title: "Support Development", iconName: "heart.fill", url: "https://bufferfly.lemonsqueezy.com/checkout/buy/f2c0bafc-c7c7-4490-9e0b-80585135dadd")
                 
-                AboutLink(title: "Report a Bug or Request a Feature", iconName: "exclamationmark.bubble.fill", url: "https://github.com/thehaipe/Bufferly/issues")
+                AboutLink(title: "Report a Bug or Request a Feature", iconName: "exclamationmark.bubble.fill", url: "https://github.com/thehaipe/Bufferfly/issues")
                 
                 AboutLink(title: "Also Visit My LinkedIn", iconName: "briefcase.fill", url: "https://www.linkedin.com/in/valentyn-m-65a30b287")
             }

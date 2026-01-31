@@ -9,7 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hide from Dock and App Switcher
         NSApp.setActivationPolicy(.accessory)
         
-        let container = BufferlyApp.columnModelContainer
+        let container = BufferflyApp.columnModelContainer
         
         // Setup Clipboard Service
         let service = ClipboardService(container: container)
@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 @main
-struct BufferlyApp: App {
+struct BufferflyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     static var columnModelContainer: ModelContainer = {
