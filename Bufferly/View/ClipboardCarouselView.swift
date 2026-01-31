@@ -58,7 +58,12 @@ struct ClipboardItemRow: View {
                     .resizable()
                     .scaledToFill()
                     .frame(width: 32, height: 32)
+                    .background(Color.black.opacity(0.05))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(.white.opacity(0.1), lineWidth: 0.5)
+                    }
             } else {
                 Image(systemName: item.type.contains("image") ? "photo" : "text.alignleft")
                     .font(.system(size: 16))

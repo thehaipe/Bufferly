@@ -4,12 +4,14 @@ struct AboutSettingsView: View {
         Form {
             Section {
                 HStack(spacing: 15) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.secondary.opacity(0.2))
+                    Image(.appLogo)
+                        .resizable()
+                        .scaledToFill()
                         .frame(width: 60, height: 60)
-                        .overlay {
-                            Image(systemName: "photo")
-                                .foregroundStyle(.secondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .background {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.secondary.opacity(0.2))
                         }
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -31,4 +33,7 @@ struct AboutSettingsView: View {
         }
         .formStyle(.grouped)
     }
+}
+#Preview{
+    AboutSettingsView()
 }
