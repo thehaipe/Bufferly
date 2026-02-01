@@ -1,23 +1,33 @@
 import SwiftUI
 import SwiftData
 
+enum FocusTarget: Hashable {
+    case row(Int)
+    case note(Int)
+}
+
 struct ClipboardCarouselView: View {
     @Query(sort: \ClipboardItem.createdAt, order: .reverse) private var items: [ClipboardItem]
     @State private var selectedIndex: Int = 0
-    @FocusState private var focusedIndex: Int?
+    @FocusState private var focus: FocusTarget?
 
     private let windowWidth: CGFloat = 338
     private let windowHeight: CGFloat = 158
     private let itemHeight: CGFloat = 60
     private let spacing: CGFloat = 4
-    
+
+    private var isEditingNote: Bool {
+        if case .note = focus { return true }
+        return false
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
                 .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
                 .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-            
+
             if items.isEmpty {
                 Text("Empty")
                     .foregroundStyle(.secondary)
@@ -28,18 +38,16 @@ struct ClipboardCarouselView: View {
                             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                                 ClipboardItemRow(
                                     item: item,
+                                    index: index,
                                     isSelected: index == selectedIndex,
-                                    onSelect: {
+                                    focus: $focus,
+                                    onSelectRow: {
                                         selectedIndex = index
-                                        focusedIndex = index
-                                    },
-                                    requestFocus: {
-                                        focusedIndex = index
                                     }
                                 )
-                                .focused($focusedIndex, equals: index)
+                                .focused($focus, equals: .row(index))
                                 .id(index)
-                                .contentShape(Rectangle()) 
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     PasteService.shared.paste(item: item)
                                 }
@@ -53,7 +61,7 @@ struct ClipboardCarouselView: View {
                             }
                         }
                         .padding(.vertical, 10)
-                        .defaultFocus($focusedIndex, 0) // Встановлює фокус на перший елемент при появі
+                        .defaultFocus($focus, .row(0))
                         .onChange(of: selectedIndex) { _, newIndex in
                             withAnimation {
                                 proxy.scrollTo(newIndex, anchor: .center)
@@ -67,28 +75,35 @@ struct ClipboardCarouselView: View {
         .frame(width: windowWidth, height: windowHeight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .onChange(of: items) { _, _ in
+            guard !isEditingNote else { return }
             selectedIndex = 0
-            focusedIndex = 0
+            focus = .row(0)
         }
         .onAppear {
             if !items.isEmpty {
-                focusedIndex = 0
+                focus = .row(0)
             }
         }
         .onKeyPress(.downArrow) {
+            guard !isEditingNote else { return .ignored }
             if selectedIndex < items.count - 1 {
                 selectedIndex += 1
-                focusedIndex = selectedIndex
-                return .handled
+                focus = .row(selectedIndex)
             }
             return .handled
         }
         .onKeyPress(.upArrow) {
+            guard !isEditingNote else { return .ignored }
             if selectedIndex > 0 {
                 selectedIndex -= 1
-                focusedIndex = selectedIndex
-                return .handled
+                focus = .row(selectedIndex)
             }
+            return .handled
+        }
+        .onKeyPress(.return) {
+            guard !isEditingNote else { return .ignored }
+            guard selectedIndex < items.count else { return .ignored }
+            PasteService.shared.paste(item: items[selectedIndex])
             return .handled
         }
     }
@@ -96,12 +111,15 @@ struct ClipboardCarouselView: View {
 
 struct ClipboardItemRow: View {
     @Bindable var item: ClipboardItem
+    let index: Int
     var isSelected: Bool
-    var onSelect: () -> Void
-    var requestFocus: () -> Void
-    
-    @FocusState private var isEditing: Bool
-    
+    var focus: FocusState<FocusTarget?>.Binding
+    var onSelectRow: () -> Void
+
+    private var isEditing: Bool {
+        focus.wrappedValue == .note(index)
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             if let data = item.binaryData, let nsImage = NSImage(data: data) {
@@ -123,19 +141,19 @@ struct ClipboardItemRow: View {
                     .background(Color.black.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.textContent?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Image")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
-                
+
                 HStack(spacing: 6) {
                     TextField("Note", text: Binding(
                         get: { item.note ?? "" },
                         set: { item.note = $0.isEmpty ? nil : $0 }
                     ))
-                    .focused($isEditing)
+                    .focused(focus, equals: .note(index))
                     .textFieldStyle(.plain)
                     .font(.system(size: 10, weight: .medium))
                     .padding(.horizontal, 6)
@@ -147,16 +165,16 @@ struct ClipboardItemRow: View {
                     }
                     .frame(width: 80)
                     .onTapGesture {
-                        onSelect()
-                        isEditing = true
+                        onSelectRow()
+                        focus.wrappedValue = .note(index)
                     }
-                    
+
                     Text(item.createdAt.formatted(date: .omitted, time: .shortened))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
             }
-            
+
             Spacer()
 
             Image(systemName: "return")
@@ -168,7 +186,7 @@ struct ClipboardItemRow: View {
         .padding(.vertical, 8)
         .background {
             RoundedRectangle(cornerRadius: 10)
-                .fill(.regularMaterial) 
+                .fill(.regularMaterial)
                 .stroke(isSelected ? Color.accentColor : Color.white.opacity(0.1), lineWidth: isSelected ? 2 : 0.5)
         }
         .padding(.horizontal, 10)
@@ -176,12 +194,10 @@ struct ClipboardItemRow: View {
         .focusEffectDisabled()
         .onKeyPress(.return) {
             if isEditing {
-                isEditing = false
-                requestFocus()
+                focus.wrappedValue = .row(index)
                 return .handled
             }
-            PasteService.shared.paste(item: item)
-            return .handled
+            return .ignored
         }
     }
 }
