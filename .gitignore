@@ -1,0 +1,36 @@
+# ── Xcode ─────────────────────────────────────────────
+build/
+DerivedData/
+*.xcarchive
+
+## User-specific settings
+xcuserdata/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+
+# ── Swift Package Manager ─────────────────────────────
+.build/
+.swiftpm/xcode/package.resolved
+.swiftpm/xcode/xcuserdata/
+
+# ── macOS ─────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ── Archives & distribution ──────────────────────────
+*.ipa
+*.dSYM.zip
+*.dSYM
