@@ -4,11 +4,12 @@ import ApplicationServices
 import OSLog
 
 final class PasteService {
-    static let shared = PasteService()
-
     private let logger = Logger(subsystem: "com.bufferly.app", category: "PasteService")
+    private let closeWindow: @MainActor () -> Void
 
-    private init() {}
+    init(closeWindow: @escaping @MainActor () -> Void) {
+        self.closeWindow = closeWindow
+    }
 
     @MainActor
     func paste(item: ClipboardItem) {
@@ -21,7 +22,7 @@ final class PasteService {
             pasteboard.setString(text, forType: .string)
         }
 
-        OverlayWindowService.shared.closeWindow()
+        closeWindow()
 
         guard AXIsProcessTrusted() else {
             logger.warning("Accessibility not granted — item copied to clipboard but auto-paste skipped")

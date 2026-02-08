@@ -9,200 +9,187 @@ enum FocusTarget: Hashable {
 struct ClipboardCarouselView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ClipboardItem.createdAt, order: .reverse) private var items: [ClipboardItem]
-        @State private var selectedIndex: Int = 0
-        @FocusState private var focus: FocusTarget?
-        @State private var showClearConfirmation = false
-    
-        private let windowWidth: CGFloat = 338
-        private let windowHeight: CGFloat = 188
-        private let listHeight: CGFloat = 158
-        private let buttonHeight: CGFloat = 28
-        private let itemHeight: CGFloat = 60
-        private let spacing: CGFloat = 4
-    
-        private var isEditingNote: Bool {
-            if case .note = focus { return true }
-            return false
-        }
-        
-        var body: some View {
-            ZStack {
-                VStack(spacing: 2) {
-                    // MARK: - List Area
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(.ultraThinMaterial)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                        
-                        if items.isEmpty {
-                            Text("Empty")
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ScrollView(.vertical, showsIndicators: false) {
-                                ScrollViewReader { proxy in
-                                    VStack(spacing: spacing) {
-                                        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                                            ClipboardItemRow(
-                                                item: item,
-                                                index: index,
-                                                isSelected: index == selectedIndex,
-                                                focus: $focus,
-                                                onSelectRow: {
-                                                    selectedIndex = index
-                                                }
-                                            )
-                                            .focused($focus, equals: .row(index))
-                                            .id(index)
-                                            .contentShape(Rectangle())
-                                            .onTapGesture {
-                                                PasteService.shared.paste(item: item)
+    @FocusState private var focus: FocusTarget?
+    var viewModel: CarouselViewModel
+
+    private let windowWidth: CGFloat = 338
+    private let windowHeight: CGFloat = 188
+    private let listHeight: CGFloat = 158
+    private let buttonHeight: CGFloat = 28
+    private let itemHeight: CGFloat = 60
+    private let spacing: CGFloat = 4
+
+    private var isEditingNote: Bool {
+        if case .note = focus { return true }
+        return false
+    }
+
+    var body: some View {
+        ZStack {
+            VStack(spacing: 2) {
+                // MARK: - List Area
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.ultraThinMaterial)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+
+                    if items.isEmpty {
+                        Text("Empty")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ScrollView(.vertical, showsIndicators: false) {
+                            ScrollViewReader { proxy in
+                                VStack(spacing: spacing) {
+                                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                                        ClipboardItemRow(
+                                            item: item,
+                                            index: index,
+                                            isSelected: index == viewModel.selectedIndex,
+                                            focus: $focus,
+                                            onSelectRow: {
+                                                viewModel.selectedIndex = index
                                             }
-                                            .frame(height: itemHeight)
-                                            .scrollTransition { content, phase in
-                                                content
-                                                    .opacity(phase.isIdentity ? 1.0 : 0.6)
-                                                    .scaleEffect(phase.isIdentity ? 1.0 : 0.85)
-                                                    .blur(radius: phase.isIdentity ? 0 : 2)
-                                            }
+                                        )
+                                        .focused($focus, equals: .row(index))
+                                        .id(index)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.pasteItem(item)
                                         }
-                                    }
-                                    .padding(.vertical, 10)
-                                    .defaultFocus($focus, .row(0))
-                                    .onChange(of: selectedIndex) { _, newIndex in
-                                        withAnimation {
-                                            proxy.scrollTo(newIndex, anchor: .center)
+                                        .frame(height: itemHeight)
+                                        .scrollTransition { content, phase in
+                                            content
+                                                .opacity(phase.isIdentity ? 1.0 : 0.6)
+                                                .scaleEffect(phase.isIdentity ? 1.0 : 0.85)
+                                                .blur(radius: phase.isIdentity ? 0 : 2)
                                         }
                                     }
                                 }
+                                .padding(.vertical, 10)
+                                .defaultFocus($focus, .row(0))
+                                .onChange(of: viewModel.selectedIndex) { _, newIndex in
+                                    withAnimation {
+                                        proxy.scrollTo(newIndex, anchor: .center)
+                                    }
+                                }
                             }
-                            .scrollClipDisabled()
+                        }
+                        .scrollClipDisabled()
+                    }
+                }
+                .frame(height: listHeight)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .opacity(viewModel.showClearConfirmation ? 0.6 : 1)
+                .animation(.default, value: viewModel.showClearConfirmation)
+
+                // MARK: - Clear Button
+                if !items.isEmpty {
+                    Button(action: {
+                        withAnimation(.spring(duration: 0.2)) {
+                            viewModel.requestClearConfirmation()
+                        }
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 10))
+                            Text("Clear History")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(height: buttonHeight)
+                    .opacity(viewModel.showClearConfirmation ? 0.6 : 1)
+                    .disabled(viewModel.showClearConfirmation)
+                }
+            }
+            if viewModel.showClearConfirmation {
+                Color.black.opacity(0.01)
+                    .onTapGesture {
+                        withAnimation(.spring(duration: 0.2)) {
+                            viewModel.cancelClearConfirmation()
                         }
                     }
-                    .frame(height: listHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .opacity(showClearConfirmation ? 0.6 : 1)
-                    .animation(.default, value: showClearConfirmation)
-                    
-                    // MARK: - Clear Button
-                    if !items.isEmpty{
-                        Button(action: {
+
+                VStack(spacing: 12) {
+                    Text("Delete all items?")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.primary)
+
+                    HStack(spacing: 12) {
+                        Button("Cancel") {
                             withAnimation(.spring(duration: 0.2)) {
-                                showClearConfirmation = true
+                                viewModel.cancelClearConfirmation()
                             }
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "trash")
-                                    .font(.system(size: 10))
-                                Text("Clear History")
-                                    .font(.system(size: 11, weight: .medium))
-                            }
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(.ultraThinMaterial)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
                         }
                         .buttonStyle(.plain)
-                        .frame(height: buttonHeight)
-                        .opacity(showClearConfirmation ? 0.6 : 1)
-                        .disabled(showClearConfirmation)
+                        .font(.system(size: 11, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                        Button("Delete") {
+                            viewModel.confirmClear(modelContext: modelContext)
+                        }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.red.opacity(0.8))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                 }
-                if showClearConfirmation {
-                    Color.black.opacity(0.01)
-                        .onTapGesture {
-                            withAnimation(.spring(duration: 0.2)) {
-                                showClearConfirmation = false
-                            }
-                        }
-                    
-                    VStack(spacing: 12) {
-                        Text("Delete all items?")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.primary)
-                        
-                        HStack(spacing: 12) {
-                            Button("Cancel") {
-                                withAnimation(.spring(duration: 0.2)) {
-                                    showClearConfirmation = false
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .font(.system(size: 11, weight: .medium))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                            
-                            Button("Delete") {
-                                clearHistory()
-                                withAnimation(.spring(duration: 0.2)) {
-                                    showClearConfirmation = false
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.red.opacity(0.8))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                        }
-                    }
-                    .padding(16)
-                    .background(.thickMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                    )
-                    .shadow(color: .black.opacity(0.3), radius: 15, x: 0, y: 10)
-                    .transition(.scale(scale: 0.9).combined(with: .opacity))
-                    .zIndex(100)
-                }
+                .padding(16)
+                .background(.thickMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                )
+                .shadow(color: .black.opacity(0.3), radius: 15, x: 0, y: 10)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+                .zIndex(100)
             }
-            .frame(width: windowWidth, height: windowHeight)
-            .onChange(of: items) { _, _ in
-                guard !isEditingNote else { return }
-                selectedIndex = 0
+        }
+        .frame(width: windowWidth, height: windowHeight)
+        .onChange(of: items) { _, _ in
+            guard !isEditingNote else { return }
+            viewModel.resetSelection()
+            focus = .row(0)
+        }
+        .onAppear {
+            if !items.isEmpty {
                 focus = .row(0)
             }
-            .onAppear {
-                if !items.isEmpty {
-                    focus = .row(0)
-                }
-            }
-            .onKeyPress(.downArrow) {
-                guard !isEditingNote else { return .ignored }
-                if selectedIndex < items.count - 1 {
-                    selectedIndex += 1
-                    focus = .row(selectedIndex)
-                }
-                return .handled
-            }
-            .onKeyPress(.upArrow) {
-                guard !isEditingNote else { return .ignored }
-                if selectedIndex > 0 {
-                    selectedIndex -= 1
-                    focus = .row(selectedIndex)
-                }
-                return .handled
-            }
-            .onKeyPress(.return) {
-                guard !isEditingNote else { return .ignored }
-                guard selectedIndex < items.count else { return .ignored }
-                PasteService.shared.paste(item: items[selectedIndex])
-                return .handled
-            }
-    }
-    
-    private func clearHistory() {
-        try? modelContext.delete(model: ClipboardItem.self)
+        }
+        .onKeyPress(.downArrow) {
+            guard !isEditingNote else { return .ignored }
+            viewModel.moveDown(itemCount: items.count)
+            focus = .row(viewModel.selectedIndex)
+            return .handled
+        }
+        .onKeyPress(.upArrow) {
+            guard !isEditingNote else { return .ignored }
+            viewModel.moveUp()
+            focus = .row(viewModel.selectedIndex)
+            return .handled
+        }
+        .onKeyPress(.return) {
+            guard !isEditingNote else { return .ignored }
+            viewModel.pasteSelected(items: items)
+            return .handled
+        }
     }
 }
 
@@ -300,7 +287,7 @@ struct ClipboardItemRow: View {
 }
 
 #Preview {
-    ClipboardCarouselView()
+    ClipboardCarouselView(viewModel: CarouselViewModel(pasteAction: { _ in }))
         .padding()
         .background(Color.blue)
 }

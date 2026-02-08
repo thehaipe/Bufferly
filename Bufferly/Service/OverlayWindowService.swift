@@ -2,22 +2,20 @@ import SwiftUI
 import AppKit
 import SwiftData
 //MARK:Important note.
-/*  I noticed that after my Mac came out of sleep mode, reusing Bufferfly became somewhat problematic. Since View was created once and simply reused, there were no problems with this until NSPanel started to become “stale.” The decision was made to rebuild the view each time. The cost of this approach is not very expensive in terms of Bufferfly, but it eliminates other extremes from the stale state.
+/*  I noticed that after my Mac came out of sleep mode, reusing Bufferfly became somewhat problematic. Since View was created once and simply reused, there were no problems with this until NSPanel started to become "stale." The decision was made to rebuild the view each time. The cost of this approach is not very expensive in terms of Bufferfly, but it eliminates other extremes from the stale state.
  */
 @MainActor
 final class OverlayWindowService {
-    static let shared = OverlayWindowService()
-    
     private var panel: NSPanel?
-    private var container: ModelContainer?
+    private let container: ModelContainer
+    private let pasteService: PasteService
     private var resignActiveObserver: NSObjectProtocol?
-    
-    private init() {}
-    
-    func setup(with container: ModelContainer) {
+
+    init(container: ModelContainer, pasteService: PasteService) {
         self.container = container
+        self.pasteService = pasteService
     }
-    
+
     func toggleWindow() {
         if let panel = panel, panel.isVisible {
             closeWindow()
@@ -52,14 +50,14 @@ final class OverlayWindowService {
 
         startMonitoringFocus()
     }
-    
+
     func closeWindow() {
         panel?.orderOut(nil)
         stopMonitoringFocus()
         //Hide app to ensure focus returns to previous app immediately
         NSApp.hide(nil)
     }
-    
+
     private func startMonitoringFocus() {
         stopMonitoringFocus()
         resignActiveObserver = NotificationCenter.default.addObserver(
@@ -70,29 +68,24 @@ final class OverlayWindowService {
             self?.closeWindow()
         }
     }
-    
+
     private func stopMonitoringFocus() {
         if let observer = resignActiveObserver {
             NotificationCenter.default.removeObserver(observer)
             resignActiveObserver = nil
         }
     }
-    
+
     private func createPanel() {
-        guard let container = container else {
-            return
-        }
-        
-        let visualEffect = NSVisualEffectView()
-        visualEffect.blendingMode = .behindWindow
-        visualEffect.state = .active
-        visualEffect.material = .hudWindow
-        
-        let hostingController = NSHostingController(rootView: 
-            ClipboardCarouselView()
-                .modelContainer(container) //Important! Share context
+        let viewModel = CarouselViewModel(pasteAction: { [weak self] item in
+            self?.pasteService.paste(item: item)
+        })
+
+        let hostingController = NSHostingController(rootView:
+            ClipboardCarouselView(viewModel: viewModel)
+                .modelContainer(container)
         )
-        
+
         // Remove .nonactivatingPanel to allow taking focus
         let panel = FloatingPanel(
             contentRect: NSRect(x: 0, y: 0, width: 338, height: 188),
@@ -108,7 +101,7 @@ final class OverlayWindowService {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.contentViewController = hostingController
         panel.hidesOnDeactivate = true
-        
+
         self.panel = panel
     }
 }
