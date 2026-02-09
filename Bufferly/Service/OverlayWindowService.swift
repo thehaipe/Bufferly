@@ -45,6 +45,12 @@ final class OverlayWindowService {
 
         panel.setFrameOrigin(NSPoint(x: x, y: y))
 
+        // Hide any other windows (e.g. Settings) before activating,
+        // otherwise NSApp.activate brings them back to front
+        for window in NSApp.windows where window !== panel {
+            window.orderOut(nil)
+        }
+        //Resolving the issue of RootView periodically appearing when pressing the shortcut.
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
 
