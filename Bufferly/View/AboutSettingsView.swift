@@ -33,7 +33,7 @@ struct AboutSettingsView: View {
             }
             
             Section("Links") {
-                AboutLink(title: "GitHub Repository", iconName: "chevron.left.forwardslash.chevron.right", url: "https://github.com/thehaipe/Bufferfly")
+                AboutLink(title: "Enjoy? Leave a star :)", iconName: "chevron.left.forwardslash.chevron.right", url: "https://github.com/thehaipe/Bufferfly")
                 
                 AboutLink(title: "Support Development", iconName: "heart.fill", url: "https://send.monobank.ua/jar/2qJmcYCUkW")
                 
