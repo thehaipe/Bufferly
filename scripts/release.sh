@@ -5,8 +5,8 @@ set -euo pipefail
 # Bufferfly — Automated Archive → Notarize → GitHub Release
 # ─────────────────────────────────────────────────────────────
 # Usage:
-#   ./scripts/release.sh                  # build + notarize only
-#   ./scripts/release.sh --publish v.version   # + create GitHub Release
+#   ./scripts/release.sh              # build + notarize only
+#   ./scripts/release.sh --publish   # + create GitHub Release (tag from Xcode version)
 #
 # ─────────────────────────────────────────────────────────────
 
@@ -20,23 +20,24 @@ EXPORT_DIR="$BUILD_DIR/export"
 EXPORT_OPTIONS="$SCRIPT_DIR/ExportOptions.plist"
 KEYCHAIN_PROFILE="Bufferfly-Notarize"
 
+# Read version from Xcode project
+VERSION=$(grep 'MARKETING_VERSION' "$PROJECT/project.pbxproj" | grep -o '[0-9]\+\.[0-9]\+[\.0-9]*' | head -1)
+if [[ -z "$VERSION" ]]; then
+    fail "Could not read MARKETING_VERSION from project.pbxproj"
+fi
+TAG="v.${VERSION}"
+
 # Parse arguments
 PUBLISH=false
-TAG=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --publish)
             PUBLISH=true
-            TAG="${2:-}"
-            if [[ -z "$TAG" ]]; then
-                echo "Error: --publish requires a tag (e.g. --publish v0.3)"
-                exit 1
-            fi
-            shift 2
+            shift
             ;;
         *)
             echo "Unknown argument: $1"
-            echo "Usage: $0 [--publish vX.Y]"
+            echo "Usage: $0 [--publish]"
             exit 1
             ;;
     esac
@@ -77,6 +78,7 @@ fi
 echo "Xcode: $XCODE_PATH"
 echo "Project: $PROJECT"
 echo "Scheme: $SCHEME"
+echo "Version: $VERSION (tag: $TAG)"
 
 # ── Clean build directory ────────────────────────────────────
 
@@ -156,12 +158,9 @@ xcrun stapler validate "$APP_PATH" 2>&1 || true
 if $PUBLISH; then
     step "Publishing to GitHub Releases ($TAG)"
 
-    # Read version from project
-    VERSION=$(grep -A1 'MARKETING_VERSION' "$PROJECT/project.pbxproj" | grep -o '[0-9]\+\.[0-9]\+[\.0-9]*' | head -1)
-
     RELEASE_NOTES="## Bufferfly ${TAG}
 
-- Version: ${VERSION:-$TAG}
+- Version: ${VERSION}
 - Signed with Developer ID
 - Notarized by Apple
 
